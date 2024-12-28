@@ -1,14 +1,17 @@
+from engine.evaluate import Evaluation
 import chess
-from engine.evaluate import parse_and_evaluate
 
 def main():
-    # Example FEN positions
     positions = [
-        "r5k1/pp2p2p/2p1q1p1/3p4/5r2/1BBP2R1/PP1Q3P/R5K1 b - - 1 22"# Knight moved
+        "r4rk1/pp3ppp/2p3n1/3p4/4P3/4N3/PPP2PPP/2KRR3 w - - 0 3"
     ]
 
     for fen in positions:
-        print(parse_and_evaluate(fen))
+        board = chess.Board(fen)
+        evaluator = Evaluation(board)
+        print("Board Position:")
+        print(board.unicode())
+        print(f"Evaluation: {evaluator.evaluate():.2f}")
         print("-" * 40)
 
 if __name__ == "__main__":

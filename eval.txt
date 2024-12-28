@@ -1,0 +1,130 @@
+Position 1:
+r2qkbnr/ppp1p1pp/n4p2/3p4/3P4/1P3b1P/PBP1P1P1/RN1QKBNR w KQkq - 0 7
+♜ ⭘ ⭘ ♛ ♚ ♝ ♞ ♜
+♟ ♟ ♟ ⭘ ♟ ⭘ ♟ ♟
+♞ ⭘ ⭘ ⭘ ⭘ ♟ ⭘ ⭘
+⭘ ⭘ ⭘ ♟ ⭘ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ♙ ⭘ ⭘ ⭘ ⭘
+⭘ ♙ ⭘ ⭘ ⭘ ♝ ⭘ ♙
+♙ ♗ ♙ ⭘ ♙ ⭘ ♙ ⭘
+♖ ♘ ⭘ ♕ ♔ ♗ ♘ ♖
+Custom Evaluation: -2.00
+Stockfish Evaluation: 4.7
+----------------------------------------
+Position 2:
+rnbq2nr/pppkbppp/3pp3/8/P4BP1/3P1P1N/RPP1P2P/1N1QKB1R b K - 2 7
+♜ ♞ ♝ ♛ ⭘ ⭘ ♞ ♜
+♟ ♟ ♟ ♚ ♝ ♟ ♟ ♟
+⭘ ⭘ ⭘ ♟ ♟ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘
+♙ ⭘ ⭘ ⭘ ⭘ ♗ ♙ ⭘
+⭘ ⭘ ⭘ ♙ ⭘ ♙ ⭘ ♘
+♖ ♙ ♙ ⭘ ♙ ⭘ ⭘ ♙
+⭘ ♘ ⭘ ♕ ♔ ♗ ⭘ ♖
+Custom Evaluation: -1.00
+Stockfish Evaluation: -1.42
+----------------------------------------
+Position 3:
+rnbqkb1r/ppp2p1p/4pn2/3P2p1/8/P2PBQ2/RPP2PPP/1N2KBNR b Kkq - 1 7
+♜ ♞ ♝ ♛ ♚ ♝ ⭘ ♜
+♟ ♟ ♟ ⭘ ⭘ ♟ ⭘ ♟
+⭘ ⭘ ⭘ ⭘ ♟ ♞ ⭘ ⭘
+⭘ ⭘ ⭘ ♙ ⭘ ⭘ ♟ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘
+♙ ⭘ ⭘ ♙ ♗ ♕ ⭘ ⭘
+♖ ♙ ♙ ⭘ ⭘ ♙ ♙ ♙
+⭘ ♘ ⭘ ⭘ ♔ ♗ ♘ ♖
+Custom Evaluation: 0.40
+Stockfish Evaluation: -0.8
+----------------------------------------
+Position 4:
+rnbqkb1r/p1pp1p1p/5n2/p3p1p1/1P6/6P1/1RPPPP1P/1NBQKBNR w Kkq - 0 8
+♜ ♞ ♝ ♛ ♚ ♝ ⭘ ♜
+♟ ⭘ ♟ ♟ ⭘ ♟ ⭘ ♟
+⭘ ⭘ ⭘ ⭘ ⭘ ♞ ⭘ ⭘
+♟ ⭘ ⭘ ⭘ ♟ ⭘ ♟ ⭘
+⭘ ♙ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ♙ ⭘
+⭘ ♖ ♙ ♙ ♙ ♙ ⭘ ♙
+⭘ ♘ ♗ ♕ ♔ ♗ ♘ ♖
+Custom Evaluation: -8.20
+Stockfish Evaluation: 0.32
+----------------------------------------
+Position 5:
+rnbqkbnr/p2p1ppp/2p5/1p2p3/2P1P3/2Q4N/PP1PKPPP/RNB2B1R w kq - 0 7
+♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜
+♟ ⭘ ⭘ ♟ ⭘ ♟ ♟ ♟
+⭘ ⭘ ♟ ⭘ ⭘ ⭘ ⭘ ⭘
+⭘ ♟ ⭘ ⭘ ♟ ⭘ ⭘ ⭘
+⭘ ⭘ ♙ ⭘ ♙ ⭘ ⭘ ⭘
+⭘ ⭘ ♕ ⭘ ⭘ ⭘ ⭘ ♘
+♙ ♙ ⭘ ♙ ♔ ♙ ♙ ♙
+♖ ♘ ♗ ⭘ ⭘ ♗ ⭘ ♖
+Custom Evaluation: 3.00
+Stockfish Evaluation: 1.02
+----------------------------------------
+Position 6:
+rnb1kb1r/p1pqpp2/3p2pn/1p5p/2BP4/2NQP3/PPP2PPP/1RB1K1NR w Kkq - 2 9
+♜ ♞ ♝ ⭘ ♚ ♝ ⭘ ♜
+♟ ⭘ ♟ ♛ ♟ ♟ ⭘ ⭘
+⭘ ⭘ ⭘ ♟ ⭘ ⭘ ♟ ♞
+⭘ ♟ ⭘ ⭘ ⭘ ⭘ ⭘ ♟
+⭘ ⭘ ♗ ♙ ⭘ ⭘ ⭘ ⭘
+⭘ ⭘ ♘ ♕ ♙ ⭘ ⭘ ⭘
+♙ ♙ ♙ ⭘ ⭘ ♙ ♙ ♙
+⭘ ♖ ♗ ⭘ ♔ ⭘ ♘ ♖
+Custom Evaluation: 9.30
+Stockfish Evaluation: 1.99
+----------------------------------------
+Position 7:
+r1bqkbnr/1pppn1pp/p3p3/5p2/2P3P1/5N2/PP1PPP1P/RNBQKB1R w KQkq - 1 6
+♜ ⭘ ♝ ♛ ♚ ♝ ♞ ♜
+⭘ ♟ ♟ ♟ ♞ ⭘ ♟ ♟
+♟ ⭘ ⭘ ⭘ ♟ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ♟ ⭘ ⭘
+⭘ ⭘ ♙ ⭘ ⭘ ⭘ ♙ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ♘ ⭘ ⭘
+♙ ♙ ⭘ ♙ ♙ ♙ ⭘ ♙
+♖ ♘ ♗ ♕ ♔ ♗ ⭘ ♖
+Custom Evaluation: -0.90
+Stockfish Evaluation: 0.48
+----------------------------------------
+Position 8:
+rn1qkb1r/1bppp1p1/pp3n1p/5p2/1P4PP/3P4/P1P1PPB1/RNBQK1NR w Qkq - 1 9
+♜ ♞ ⭘ ♛ ♚ ♝ ⭘ ♜
+⭘ ♝ ♟ ♟ ♟ ⭘ ♟ ⭘
+♟ ♟ ⭘ ⭘ ⭘ ♞ ⭘ ♟
+⭘ ⭘ ⭘ ⭘ ⭘ ♟ ⭘ ⭘
+⭘ ♙ ⭘ ⭘ ⭘ ⭘ ♙ ♙
+⭘ ⭘ ⭘ ♙ ⭘ ⭘ ⭘ ⭘
+♙ ⭘ ♙ ⭘ ♙ ♙ ♗ ⭘
+♖ ♘ ♗ ♕ ♔ ⭘ ♘ ♖
+Custom Evaluation: -4.40
+Stockfish Evaluation: 4.65
+----------------------------------------
+Position 9:
+r1bqkbnr/pp1pppp1/n6p/2p5/6Q1/2N1P3/PPPP1PPP/R1B1KBNR w KQkq - 0 4
+♜ ⭘ ♝ ♛ ♚ ♝ ♞ ♜
+♟ ♟ ⭘ ♟ ♟ ♟ ♟ ⭘
+♞ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ♟
+⭘ ⭘ ♟ ⭘ ⭘ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ♕ ⭘
+⭘ ⭘ ♘ ⭘ ♙ ⭘ ⭘ ⭘
+♙ ♙ ♙ ♙ ⭘ ♙ ♙ ♙
+♖ ⭘ ♗ ⭘ ♔ ♗ ♘ ♖
+Custom Evaluation: 5.70
+Stockfish Evaluation: 0.45
+----------------------------------------
+Position 10:
+r1bqkb1r/ppp1pppn/n2p3p/8/3P4/N1P4P/PP1KPPP1/R1BQ1BNR w kq - 3 6
+♜ ⭘ ♝ ♛ ♚ ♝ ⭘ ♜
+♟ ♟ ♟ ⭘ ♟ ♟ ♟ ♞
+♞ ⭘ ⭘ ♟ ⭘ ⭘ ⭘ ♟
+⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘ ⭘
+⭘ ⭘ ⭘ ♙ ⭘ ⭘ ⭘ ⭘
+♘ ⭘ ♙ ⭘ ⭘ ⭘ ⭘ ♙
+♙ ♙ ⭘ ♔ ♙ ♙ ♙ ⭘
+♖ ⭘ ♗ ♕ ⭘ ♗ ♘ ♖
+Custom Evaluation: 0.00
+Stockfish Evaluation: 0.14
+----------------------------------------
