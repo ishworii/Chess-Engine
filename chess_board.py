@@ -1,18 +1,22 @@
+# chess_board.py
+
 import pygame
 import chess
 import chess.pgn
 from datetime import datetime
-from engine.search import ChessEngine
-from engine.evaluate import Evaluation
+from engine.search import ChessEngine  # Updated import path if necessary
+import time
 
 class ChessBoard:
     def __init__(self, board):
         self.board = board
         self.square_size = 80
-        self.window_size = self.square_size * 8
+        self.board_size = self.square_size * 8
+        self.info_height = 40  # Height for move information
+        self.window_size = (self.board_size, self.board_size + self.info_height)
         self.screen = None
         self.font = None
-        self.engine = ChessEngine(board, Evaluation(board))
+        self.engine = ChessEngine(board)
         # Add game information
         self.game = chess.pgn.Game()
         self.game.headers["Event"] = "Computer Self-Play"
@@ -34,16 +38,22 @@ class ChessBoard:
         for piece in pieces:
             for color in colors:
                 filename = f"images/{color}{piece}.png"
-                image = pygame.image.load(filename)
-                # Scale image to fit square size
-                image = pygame.transform.scale(image, (self.square_size, self.square_size))
-                self.piece_images[f"{color}{piece}"] = image
+                try:
+                    image = pygame.image.load(filename)
+                    image = pygame.transform.scale(image, (self.square_size, self.square_size))
+                    self.piece_images[f"{color}{piece}"] = image
+                except pygame.error as e:
+                    print(f"Error loading image {filename}: {e}")
 
     def draw_board(self):
         """
         Draws the chessboard on the screen.
         """
-        colors = [pygame.Color("white"), pygame.Color("gray")]
+        # Fill background
+        self.screen.fill(pygame.Color("gray20"))
+
+        # Draw board squares
+        colors = [pygame.Color("white"), pygame.Color(100, 100, 100)]  # Lighter gray for dark squares
         for rank in range(8):
             for file in range(8):
                 color = colors[(rank + file) % 2]
@@ -52,6 +62,19 @@ class ChessBoard:
                     color,
                     pygame.Rect(file * self.square_size, rank * self.square_size, self.square_size, self.square_size)
                 )
+
+        # Draw coordinates
+        coord_color = pygame.Color("white")
+        for i in range(8):
+            # Draw file letters
+            text = chr(ord('a') + i)
+            text_surface = self.font.render(text, True, coord_color)
+            self.screen.blit(text_surface, (i * self.square_size + 5, self.board_size - 20))
+
+            # Draw rank numbers
+            text = str(8 - i)
+            text_surface = self.font.render(text, True, coord_color)
+            self.screen.blit(text_surface, (5, i * self.square_size + 5))
 
     def draw_pieces(self):
         """
@@ -68,14 +91,26 @@ class ChessBoard:
                 piece_symbol = piece.symbol()
                 piece_key = piece_mapping[piece_symbol]
 
-                # Calculate position
                 file = chess.square_file(square)
-                rank = 7 - chess.square_rank(square)  # Flip rank for correct orientation
+                rank = 7 - chess.square_rank(square)
 
                 x = file * self.square_size
                 y = rank * self.square_size
 
                 self.screen.blit(self.piece_images[piece_key], (x, y))
+
+    def draw_info(self, move_count):
+        """
+        Draws move information and current turn at the bottom.
+        """
+        info_rect = pygame.Rect(0, self.board_size, self.window_size[0], self.info_height)
+        pygame.draw.rect(self.screen, pygame.Color("gray20"), info_rect)
+
+        # Draw move count and turn
+        turn_text = f"Move {move_count} - {'White' if self.board.turn else 'Black'} to move"
+        text_surface = self.font.render(turn_text, True, pygame.Color("white"))
+        text_rect = text_surface.get_rect(center=(self.window_size[0]//2, self.board_size + self.info_height//2))
+        self.screen.blit(text_surface, text_rect)
 
     def save_game(self, filename="games/game.pgn"):
         """
@@ -93,9 +128,10 @@ class ChessBoard:
             import os
             os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-            # Append to PGN file
+            # Save game to PGN file
             with open(filename, "a") as pgn_file:
-                print(self.game, file=pgn_file)
+                exporter = chess.pgn.FileExporter(pgn_file)
+                self.game.accept(exporter)
                 print("\n", file=pgn_file)  # Add blank line between games
 
             print(f"Game saved to {filename}")
@@ -108,92 +144,56 @@ class ChessBoard:
         Starts a game where the engine plays against itself.
         """
         pygame.init()
-        self.screen = pygame.display.set_mode((self.window_size, self.window_size))
+        self.screen = pygame.display.set_mode(self.window_size)
         pygame.display.set_caption("Chess Engine Self-Play")
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.Font(None, 24)
 
         running = True
         move_count = 1
         clock = pygame.time.Clock()
 
         while running:
+            time.sleep(0.1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
             self.draw_board()
             self.draw_pieces()
+            self.draw_info(move_count)
             pygame.display.flip()
 
             if not self.board.is_game_over():
                 print(f"Move {move_count}: Engine is thinking at depth {depth}...")
                 best_move = self.engine.find_best_move(depth)
-                print(f"Move {move_count}: Best move: {best_move}")
 
-                # Add move to game
-                self.node = self.node.add_variation(best_move)
+                try:
+                    san_move = self.board.san(best_move)
+                    print(f"Move {move_count}: Best move: {san_move}")
 
-                self.board.push(best_move)
-                move_count += 1
+                    # Add move to game
+                    self.node = self.node.add_variation(best_move)
+                    self.board.push(best_move)
+                    move_count += 1
+                except ValueError as e:
+                    print(f"Invalid move generated: {e}")
+                    running = False
             else:
                 result_text = f"Game Over: {self.board.result()}"
                 print(result_text)
-                # Save game when it's over
                 self.save_game()
                 running = False
 
-            clock.tick(60)  # Limit to 60 FPS
-
+            clock.tick(60)
+        time.sleep(5)
         pygame.quit()
 
-    def export_to_chess_com_format(self, filename="games/chess_com_game.txt"):
-        """
-        Export the game in a format that can be imported to chess.com
-        """
-        try:
-            # Create directory if it doesn't exist
-            import os
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-            with open(filename, "w") as f:
-                # Write moves in chess.com format
-                moves = []
-                current_node = self.game
-                while current_node.variations:
-                    current_node = current_node.variation(0)
-                    moves.append(current_node.move.uci())
-
-                # Join moves with commas
-                f.write(",".join(moves))
-
-            print(f"Game exported for chess.com to {filename}")
-
-        except Exception as e:
-            print(f"Error exporting game: {e}")
-
-    def save_game_with_timestamp(self):
-        """
-        Save the game with a timestamp in the filename
-        """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"games/game_{timestamp}.pgn"
-        self.save_game(filename)
-
-    def add_comment(self, comment: str):
-        """
-        Add a comment to the current position
-        """
-        self.node.comment = comment
-
-    def add_evaluation(self, eval_score: float):
-        """
-        Add evaluation score as a comment
-        """
-        self.node.comment = f"Evaluation: {eval_score}"
+    # Ensure the rest of your ChessBoard methods are correctly implemented
 
 
 if __name__ == "__main__":
-    board = chess.Board()
+    fen = "8/p1p2k1p/5p2/3r4/1p4B1/5N2/5P1P/2B1K2R w K - 0 24"
+    board = chess.Board(fen=fen)
     chess_board_gui = ChessBoard(board)
-    chess_board_gui.start_self_play(depth=3)
-    chess_board_gui.export_to_chess_com_format()
+    chess_board_gui.start_self_play(depth=6)
+    # chess_board_gui.export_to_chess_com_pgn()
