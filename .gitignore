@@ -1,6 +1,7 @@
 .idea/
 stockfish_17/
 games/
+.DS_Store
 
 ### Python template
 # Byte-compiled / optimized / DLL files
