@@ -198,44 +198,133 @@ class Evaluation:
 
         return (white_mobility - black_mobility) * 2
 
-    def evaluate(self) -> float:
-        """Main evaluation function."""
-        if self.board.is_checkmate():
-            return -self.CHECKMATE if self.board.turn else self.CHECKMATE
-        if self.board.is_stalemate() or self.board.is_insufficient_material():
-            return self.STALEMATE
-
+    def evaluate_material_and_position(self) -> float:
+        """Original material and piece-square table evaluation"""
         score = 0
 
-        # Material and piece-square tables
         for square in chess.SQUARES:
             piece = self.board.piece_at(square)
             if piece is not None:
+                # Material score
                 value = self.PIECE_VALUES[piece.piece_type]
-                position_value = self.get_piece_table_value(piece, square)
+                if piece.color == chess.WHITE:
+                    score += value
+                else:
+                    score -= value
 
-                if piece.color:  # White
-                    score += value + position_value
-                else:  # Black
-                    score -= value + position_value
+                # Position score
+                position_score = self.get_piece_table_value(piece, square)
+                if piece.color == chess.WHITE:
+                    score += position_score
+                else:
+                    score -= position_score
 
-        # Pawn structure
-        score += self.evaluate_pawn_structure()
+        return score
 
-        # Mobility
-        score += self.evaluate_mobility()
+    def count_pieces(self, color: bool) -> int:
+        """Count number of pieces (excluding pawns and king)"""
+        count = 0
+        for piece_type in [chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT]:
+            count += len(self.board.pieces(piece_type, color))
+        return count
 
-        # Bishop pair bonus
-        if len(self.board.pieces(chess.BISHOP, chess.WHITE)) >= 2:
-            score += 30
-        if len(self.board.pieces(chess.BISHOP, chess.BLACK)) >= 2:
-            score -= 30
+    def evaluate_pawn_advancement(self, white_winning: bool) -> float:
+        """Evaluate pawn advancement towards promotion"""
+        score = 0
+        for square in chess.SQUARES:
+            piece = self.board.piece_at(square)
+            if piece and piece.piece_type == chess.PAWN:
+                rank = chess.square_rank(square)
+                if piece.color == chess.WHITE:
+                    score += rank * 10  # Higher rank = better for white
+                else:
+                    score += (7 - rank) * 10  # Lower rank = better for black
 
-        # Side to move bonus
-        if self.board.turn:
-            score += self.SIDE_TO_MOVE_BONUS
+        return score if white_winning else -score
+
+    def evaluate_king_proximity(self, white_winning: bool) -> float:
+        """Evaluate king proximity in winning positions"""
+        score = 0
+        white_king = self.board.king(chess.WHITE)
+        black_king = self.board.king(chess.BLACK)
+
+        if white_king and black_king:
+            distance = chess.square_distance(white_king, black_king)
+            if white_winning:
+                score -= distance * 10  # White king should get closer
+            else:
+                score += distance * 10  # Black king should get closer
+
+        return score
+
+    def evaluate_piece_centralization(self, white_winning: bool) -> float:
+        """Evaluate piece centralization in winning positions"""
+        score = 0
+        central_squares = [chess.E4, chess.D4, chess.E5, chess.D5]
+
+        for square in chess.SQUARES:
+            piece = self.board.piece_at(square)
+            if piece and piece.piece_type != chess.KING and piece.piece_type != chess.PAWN:
+                # Calculate distance to center
+                min_distance = min(chess.square_distance(square, center) for center in central_squares)
+                piece_score = (4 - min_distance) * 5  # 5 points per square closer to center
+
+                if piece.color == chess.WHITE:
+                    score += piece_score
+                else:
+                    score -= piece_score
+
+        return score if white_winning else -score
+
+    def evaluate_winning_position(self, white_winning: bool) -> float:
+        """
+        Additional evaluation terms for winning positions
+        """
+        score = 0
+
+        # 1. Encourage piece exchanges when ahead
+        piece_count_diff = self.count_pieces(chess.WHITE) - self.count_pieces(chess.BLACK)
+        if white_winning:
+            score -= piece_count_diff * 10  # White wants to trade when winning
         else:
-            score -= self.SIDE_TO_MOVE_BONUS
+            score += piece_count_diff * 10  # Black wants to trade when winning
+
+        # 2. Evaluate pawn advancement
+        score += self.evaluate_pawn_advancement(white_winning)
+
+        # 3. Evaluate king proximity in winning positions
+        score += self.evaluate_king_proximity(white_winning)
+
+        # 4. Evaluate piece centralization
+        score += self.evaluate_piece_centralization(white_winning)
+
+        return score if white_winning else -score
+
+    def evaluate_material(self) -> float:
+        """Pure material evaluation"""
+        score = 0
+        for piece_type in chess.PIECE_TYPES:
+            score += len(self.board.pieces(piece_type, chess.WHITE)) * self.PIECE_VALUES[piece_type]
+            score -= len(self.board.pieces(piece_type, chess.BLACK)) * self.PIECE_VALUES[piece_type]
+        return score
+
+    def evaluate(self) -> float:
+        """
+        Main evaluation function.
+        Returns score from White's perspective.
+        """
+        if self.board.is_checkmate():
+            return -self.CHECKMATE if self.board.turn else self.CHECKMATE
+        if self.board.is_stalemate() or self.board.is_insufficient_material():
+            return 0
+
+        # Basic material and position evaluation
+        score = self.evaluate_material_and_position()
+
+        # Additional evaluation for winning positions
+        material_diff = self.evaluate_material()
+        if abs(material_diff) > 200:  # If someone is clearly winning
+            score += self.evaluate_winning_position(material_diff > 0)
 
         return score
 
