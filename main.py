@@ -30,7 +30,7 @@ def evaluate_moves(board: chess.Board, evaluator: Evaluation) -> List[Tuple[ches
 
 def main():
     positions = [
-    "8/5k2/2Bp4/3R4/4P3/3P4/1PK5/8 w - - 3 39"
+    "r4qk1/ppp3pp/4R3/3p4/3Qn3/3B4/PPP2PPP/6K1 w - - 1 20"
     ]
 
     for fen in positions:
@@ -54,10 +54,10 @@ def main():
 
         print("\nEngine Search Result:")
         # Define search depth
-        depth = 6
+        depth = 2
 
         # Find the best move using ChessEngine
-        best_move = engine.find_best_move(depth)
+        best_move = engine.find_best_move(depth,time_limit=600)
 
         print(f"Best Move at depth {depth}: {best_move} ({board.san(best_move)})")
         print(f"Engine Evaluation: {evaluator.evaluate():.2f}")

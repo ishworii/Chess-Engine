@@ -1,10 +1,8 @@
-# chess_board.py
-
 import pygame
 import chess
 import chess.pgn
 from datetime import datetime
-from engine.search import ChessEngine  # Updated import path if necessary
+from engine.search import ChessEngine
 import time
 
 class ChessBoard:
@@ -188,12 +186,9 @@ class ChessBoard:
         time.sleep(5)
         pygame.quit()
 
-    # Ensure the rest of your ChessBoard methods are correctly implemented
-
-
 if __name__ == "__main__":
-    fen = "8/p1p2k1p/5p2/3r4/1p4B1/5N2/5P1P/2B1K2R w K - 0 24"
+    fen = "r4r1k/pb2q1pp/np6/2p1N3/2Qp1P2/4PR2/P1P3PP/1R4K1 w - - 2 22"
     board = chess.Board(fen=fen)
     chess_board_gui = ChessBoard(board)
-    chess_board_gui.start_self_play(depth=6)
+    chess_board_gui.start_self_play(depth=5)
     # chess_board_gui.export_to_chess_com_pgn()
