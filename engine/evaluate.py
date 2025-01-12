@@ -120,6 +120,36 @@ class Evaluation:
 
         return queens == 0 or (queens == 1 and minor_pieces <= 2)
 
+    def is_passed_pawn(self, square: chess.Square, color: bool) -> bool:
+        """
+        Checks if the pawn on `square` (of color `color`) is passed.
+        A simple version: No enemy pawns exist on the same or adjacent files
+        in front of this pawn.
+        """
+        file = chess.square_file(square)
+        rank = chess.square_rank(square)
+
+        # Directions: White pawns go up (increasing rank),
+        #             Black pawns go down (decreasing rank)
+        if color == chess.WHITE:
+            # Look for black pawns in front
+            enemy_color = chess.BLACK
+            rank_range = range(rank + 1, 8)
+        else:
+            # Look for white pawns in front
+            enemy_color = chess.WHITE
+            rank_range = range(rank - 1, -1, -1)
+
+        for r in rank_range:
+            for f in [file - 1, file, file + 1]:
+                if 0 <= f < 8:  # valid file
+                    sq = chess.square(f, r)
+                    piece = self.board.piece_at(sq)
+                    if piece and piece.piece_type == chess.PAWN and piece.color == enemy_color:
+                        return False
+        return True
+
+
     def get_piece_table_value(self, piece: chess.Piece, square: chess.Square) -> int:
         """Returns the piece-square table value for a given piece and square."""
         rank = chess.square_rank(square)
@@ -144,42 +174,6 @@ class Evaluation:
                 return self.KING_TABLE_ENDGAME[rank][file]
             return self.KING_TABLE_MIDDLEGAME[rank][file]
         return 0
-
-    def evaluate_pawn_structure(self) -> int:
-        """Evaluates pawn structure including doubled, isolated, and passed pawns."""
-        score = 0
-        white_pawn_files = [0] * 8
-        black_pawn_files = [0] * 8
-
-        # Count pawns on each file
-        for square in chess.SQUARES:
-            piece = self.board.piece_at(square)
-            if piece and piece.piece_type == chess.PAWN:
-                file = chess.square_file(square)
-                if piece.color:
-                    white_pawn_files[file] += 1
-                else:
-                    black_pawn_files[file] += 1
-
-        # Evaluate doubled and isolated pawns
-        for file in range(8):
-            # Doubled pawns penalty
-            if white_pawn_files[file] > 1:
-                score -= 20 * (white_pawn_files[file] - 1)
-            if black_pawn_files[file] > 1:
-                score += 20 * (black_pawn_files[file] - 1)
-
-            # Isolated pawns penalty
-            if white_pawn_files[file] > 0:
-                if (file == 0 or white_pawn_files[file-1] == 0) and \
-                        (file == 7 or white_pawn_files[file+1] == 0):
-                    score -= 10
-            if black_pawn_files[file] > 0:
-                if (file == 0 or black_pawn_files[file-1] == 0) and \
-                        (file == 7 or black_pawn_files[file+1] == 0):
-                    score += 10
-
-        return score
 
     def evaluate_mobility(self) -> int:
         """Evaluates piece mobility (number of legal moves available)."""
@@ -220,6 +214,65 @@ class Evaluation:
                     score -= position_score
 
         return score
+    def evaluate_pawn_structure(self) -> int:
+        """Evaluates pawn structure including doubled, isolated, and passed pawns."""
+        score = 0
+        white_pawn_files = [0] * 8
+        black_pawn_files = [0] * 8
+
+        # Count pawns on each file
+        for square in chess.SQUARES:
+            piece = self.board.piece_at(square)
+            if piece and piece.piece_type == chess.PAWN:
+                file = chess.square_file(square)
+                if piece.color == chess.WHITE:
+                    white_pawn_files[file] += 1
+                else:
+                    black_pawn_files[file] += 1
+
+        # Evaluate doubled and isolated pawns
+        for file in range(8):
+            # Doubled pawns penalty
+            if white_pawn_files[file] > 1:
+                # penalize each extra pawn on that file
+                score -= 20 * (white_pawn_files[file] - 1)
+            if black_pawn_files[file] > 1:
+                score += 20 * (black_pawn_files[file] - 1)
+
+            # Isolated pawns penalty
+            if white_pawn_files[file] > 0:
+                # no neighbor pawns on adjacent files
+                left_empty = (file == 0 or white_pawn_files[file-1] == 0)
+                right_empty = (file == 7 or white_pawn_files[file+1] == 0)
+                if left_empty and right_empty:
+                    score -= 10
+            if black_pawn_files[file] > 0:
+                left_empty = (file == 0 or black_pawn_files[file-1] == 0)
+                right_empty = (file == 7 or black_pawn_files[file+1] == 0)
+                if left_empty and right_empty:
+                    score += 10
+
+        # (1) Big bonus for passed pawns (especially if advanced)
+        for square in chess.SQUARES:
+            piece = self.board.piece_at(square)
+            if piece and piece.piece_type == chess.PAWN:
+                if self.is_passed_pawn(square, piece.color):
+                    rank = chess.square_rank(square)
+                    if piece.color == chess.WHITE:
+                        # Example: base + advanced bonus
+                        # If rank=4 or 5, 6, 7 => bigger bonus for being closer to promotion
+                        # You can tune these numbers to taste
+                        passed_bonus = 200 + rank * 50
+                        score += passed_bonus
+                    else:
+                        # For Black, the rank is reversed
+                        # e.g. rank=3 => 8-3=5 from black's perspective
+                        # Or just do something symmetrical
+                        passed_bonus = 200 + (7 - rank) * 50
+                        score -= passed_bonus
+
+        return score
+
 
     def count_pieces(self, color: bool) -> int:
         """Count number of pieces (excluding pawns and king)"""
@@ -228,19 +281,6 @@ class Evaluation:
             count += len(self.board.pieces(piece_type, color))
         return count
 
-    def evaluate_pawn_advancement(self, white_winning: bool) -> float:
-        """Evaluate pawn advancement towards promotion"""
-        score = 0
-        for square in chess.SQUARES:
-            piece = self.board.piece_at(square)
-            if piece and piece.piece_type == chess.PAWN:
-                rank = chess.square_rank(square)
-                if piece.color == chess.WHITE:
-                    score += rank * 10  # Higher rank = better for white
-                else:
-                    score += (7 - rank) * 10  # Lower rank = better for black
-
-        return score if white_winning else -score
 
     def evaluate_king_proximity(self, white_winning: bool) -> float:
         """Evaluate king proximity in winning positions"""
@@ -285,12 +325,10 @@ class Evaluation:
         # 1. Encourage piece exchanges when ahead
         piece_count_diff = self.count_pieces(chess.WHITE) - self.count_pieces(chess.BLACK)
         if white_winning:
-            score -= piece_count_diff * 10  # White wants to trade when winning
+            score -= piece_count_diff * 20  # White wants to trade when winning
         else:
-            score += piece_count_diff * 10  # Black wants to trade when winning
+            score += piece_count_diff * 20  # Black wants to trade when winning
 
-        # 2. Evaluate pawn advancement
-        score += self.evaluate_pawn_advancement(white_winning)
 
         # 3. Evaluate king proximity in winning positions
         score += self.evaluate_king_proximity(white_winning)
@@ -320,10 +358,12 @@ class Evaluation:
 
         # Basic material and position evaluation
         score = self.evaluate_material_and_position()
+        score += self.evaluate_mobility() * 5
+        score += self.evaluate_pawn_structure()
 
         # Additional evaluation for winning positions
         material_diff = self.evaluate_material()
-        if abs(material_diff) > 200:  # If someone is clearly winning
+        if abs(material_diff) > 100:  # If someone is clearly winning
             score += self.evaluate_winning_position(material_diff > 0)
 
         return score
