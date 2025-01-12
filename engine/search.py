@@ -51,6 +51,7 @@ class ChessEngine:
 
     def get_ordered_moves(self, tt_move: Optional[chess.Move] = None, depth: int = 0) -> list:
         """Enhanced move ordering with winning position consideration"""
+        #print("Getting ordered moves...")
         moves = []
         material_eval = self.evaluator.evaluate_material()
         is_winning = abs(material_eval) > 200
@@ -81,6 +82,8 @@ class ChessEngine:
 
     def store_killer_move(self, move: chess.Move, depth: int):
         """Store a killer move at the given depth"""
+        #print("Killer move", move)
+        self.killer_moves[depth].append(move)
         if depth >= self.max_depth:
             return
         if move != self.killer_moves[depth][0]:
@@ -89,6 +92,7 @@ class ChessEngine:
 
     def store_tt_entry(self, key: int, depth: int, score: float, node_type: NodeType, best_move: Optional[chess.Move]):
         """Store an entry in the transposition table"""
+        #print("Storing tt entry", key, depth, score, node_type, best_move)
         if len(self.tt) >= self.tt_size:
             self.tt.clear()  # Simple approach: clear the TT when full
         self.tt[key] = TranspositionEntry(key, depth, score, node_type, best_move)
@@ -96,7 +100,7 @@ class ChessEngine:
     def score_move(self, move: chess.Move, is_winning_position: bool = False) -> int:
         """Enhanced move scoring considering winning positions"""
         score = 0
-
+        #print("Calculating score...")
         # Bonus for captures
         if self.board.is_capture(move):
             victim = self.board.piece_at(move.to_square)
@@ -132,6 +136,7 @@ class ChessEngine:
 
     def quiescence(self, alpha: float, beta: float, is_maximizing: bool, depth: int = 0, max_depth: int = 4) -> float:
         """Quiescence search with winning position consideration"""
+        #print("Running Quiescence...")
         self.nodes_searched += 1
 
         stand_pat = self.evaluator.evaluate()
@@ -181,6 +186,7 @@ class ChessEngine:
           (1) Mate distance scoring
           (2) Discouraging draws if we’re winning
         """
+        #print("Running minimax...")
         self.nodes_searched += 1
 
         # Check for timeout
@@ -227,7 +233,7 @@ class ChessEngine:
 
             if is_winning_side:
                 # Slight penalty if you're winning but forced to draw
-                return -50
+                return -500
             else:
                 # Normal draw score
                 return 0
@@ -304,6 +310,7 @@ class ChessEngine:
         - Simple 'contempt' for draws
         - 'Mate distance' scoring
         """
+        #print("Finding best move wit iterative deepening...")
         self.nodes_searched = 0
         self.best_move = None
         start_time = time.time()
@@ -311,14 +318,14 @@ class ChessEngine:
         # Clear killer moves for a new search
         self.killer_moves = [[None, None] for _ in range(self.max_depth)]
 
-        # Track a best move from the previous iteration
+        # Track best move from the previous iteration
         previous_best_move = None
         previous_scores = []
         stable_count = 0
 
         try:
             for depth in range(1, max_depth + 1):
-                is_maximizing = (self.board.turn == chess.BLACK)
+                is_maximizing = (self.board.turn == chess.WHITE)
 
                 # Use previous best move for better move ordering
                 if previous_best_move:
@@ -348,21 +355,21 @@ class ChessEngine:
 
                 # Simple check if we are winning
                 material_eval = self.evaluator.evaluate_material()
-                is_winning = abs(material_eval) > 200
+                is_winning = abs(material_eval) > 100
 
-                # Try to see if the position is stable enough to stop
-                if is_winning and len(previous_scores) >= 2:
-                    # If scores haven’t changed much for 2 iterations, might stop
-                    if abs(previous_scores[-1] - previous_scores[-2]) < 50:
-                        stable_count += 1
-                    else:
-                        stable_count = 0
-
-                    # If stable for 2 iterations in a winning position
-                    if stable_count >= 2:
-                        # Only break if the best move is forcing
-                        if self.is_forcing_move(self.best_move):
-                            break
+                # # Try to see if the position is stable enough to stop
+                # if is_winning and len(previous_scores) >= 2:
+                #     # If scores haven’t changed much for 2 iterations, might stop
+                #     if abs(previous_scores[-1] - previous_scores[-2]) < 50:
+                #         stable_count += 1
+                #     else:
+                #         stable_count = 0
+                #
+                #     # If stable for 2 iterations in a winning position
+                #     if stable_count >= 2:
+                #         # Only break if the best move is forcing
+                #         if self.is_forcing_move(self.best_move):
+                #             break
 
                 # Time left?
                 remaining_time = time_limit - elapsed
@@ -390,6 +397,7 @@ class ChessEngine:
         return self.best_move
 
     def is_forcing_move(self, move: Optional[chess.Move]) -> bool:
+        #print("Checking forcing move")
         """Check if a move is forcing (capture, check, or promotion)"""
         if not move:
             return False
@@ -401,6 +409,7 @@ class ChessEngine:
 
     def get_best_move_from_quick_search(self) -> Optional[chess.Move]:
         """Quick fallback 1-ply search"""
+        #print("Quick fallback 1-ply search")
         best_score = -float('inf') if self.board.turn == chess.WHITE else float('inf')
         best_move = None
 
@@ -423,6 +432,9 @@ class ChessEngine:
 
     def find_best_move(self, max_depth: int, time_limit: float = 60.0) -> Optional[chess.Move]:
         """Public method to find the best move using iterative deepening."""
+        #print("Searching for best move...find_best_move")
+        start_time = time.time()
+        best_score = -float('inf')
         return self.find_best_move_iterative_deepening(max_depth, time_limit)
 
 
