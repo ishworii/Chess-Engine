@@ -198,44 +198,56 @@ class ChessBoard:
             print(f"Error saving game: {e}")
 
     def export_to_chess_com_pgn(self, filename="games/chess_com_game.pgn"):
-        """Exports the game in chess.com-compatible format."""
+        """Exports the game in a minimal PGN format that respects the FEN's
+        starting move number and whose turn it is, using standard PGN notation."""
+
         try:
             os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-            # Format headers
+            # 1) Build headers
             headers = (
-                f'[Event "{self.game.headers["Event"]}"]\n'
-                f'[Site "Local Engine Game"]\n'
+                f'[Event "{self.game.headers.get("Event", "?")}"]\n'
+                f'[Site "{self.game.headers.get("Site", "?")}"]\n'
                 f'[Date "{self.game.headers["Date"]}"]\n'
-                f'[Round "1"]\n'
+                f'[Round "?"]\n'
                 f'[White "{self.game.headers["White"]}"]\n'
                 f'[Black "{self.game.headers["Black"]}"]\n'
                 f'[Result "{self.game.headers["Result"]}"]\n'
-                f'[TimeControl "-"]\n'
-                f'[Variant "Standard"]\n'
-                f'[ECO "?"]\n'
-                f'[Opening "?"]\n'
-                # Because we start from a custom FEN:
+                # Because we start from a custom position:
                 f'[SetUp "1"]\n'
                 f'[FEN "{self.board.fen()}"]\n'
             )
 
-            # Format moves with proper numbering
+            # 2) Determine starting move number and who moves first from the FEN
+            move_number = self.board.fullmove_number
+            is_white_to_move = self.board.turn
+
+            # 3) Collect SAN moves from the game object
             moves_text = ""
             node = self.game
-            move_number = 1
+            first_move = True
+
+            # If Black moves first, start with the move number and ellipsis
+            if not is_white_to_move and first_move:
+                moves_text += f"{move_number}... "
+
             while node.variations:
-                node = node.variation(0)
-                # In PGN notation, we prepend the move number on White's move
-                if node.parent.turn() == chess.WHITE:
-                    moves_text += f"{move_number}. "
-                moves_text += f"{node.san()} "
-                if node.parent.turn() == chess.BLACK:
+                node = node.variation(0)  # Follow the mainline
+
+                if is_white_to_move:
+                    moves_text += f"{move_number}. {node.san()} "
+                else:
+                    moves_text += f"{node.san()} "
                     move_number += 1
 
-            # Add final result at end
+                is_white_to_move = not is_white_to_move
+                first_move = False
+
+            # Append the final result
+            moves_text = moves_text.strip()
             moves_text += f" {self.game.headers['Result']}"
 
+            # 4) Write out to file
             with open(filename, "w") as pgn_file:
                 pgn_file.write(headers + "\n" + moves_text + "\n\n")
 
@@ -243,6 +255,8 @@ class ChessBoard:
 
         except Exception as e:
             print(f"Error exporting game: {e}")
+
+
 
     def draw_move_history(self):
         """Draws the move history panel with proper move formatting."""
@@ -331,7 +345,7 @@ class ChessBoard:
 
 if __name__ == "__main__":
     # Test position
-    fen = "4r3/1R6/8/p2Rn1p1/2P2k2/P5pP/5P2/6K1 b - - 0 41"
+    fen = "3k4/p5pp/8/8/8/P5BP/8/3K4 w - - 0 1"
     board = chess.Board(fen=fen)
     chess_board_gui = ChessBoard(board)
-    chess_board_gui.start_self_play(depth=7)
+    chess_board_gui.start_self_play(depth=5)

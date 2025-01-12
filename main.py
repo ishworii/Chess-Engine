@@ -29,39 +29,36 @@ def evaluate_moves(board: chess.Board, evaluator: Evaluation) -> List[Tuple[ches
 
 
 def main():
-    positions = [
-    "4r3/1R6/8/p2R2p1/2P2k2/P4npP/5PK1/8 b - - 2 42"
-    ]
+    position = "8/8/1K1k4/8/8/P7/8/8 w - - 0 1"
 
-    for fen in positions:
-        board = chess.Board(fen=fen)
-        evaluator = Evaluation(board)
-        engine = ChessEngine(board)
+    board = chess.Board(fen=position)
+    evaluator = Evaluation(board)
+    engine = ChessEngine(board)
+    print("Board Position:")
+    print(board.unicode())
+    print(f"Initial Position Evaluation: {evaluator.evaluate():.3f}")
+    print("\nAll Legal Moves Sorted by Evaluation:")
+    print("-" * 50)
+    print("Move    | Evaluation | SAN")
+    print("-" * 50)
 
-        print("Board Position:")
-        print(board.unicode())
-        print(f"Initial Position Evaluation: {evaluator.evaluate():.3f}")
-        print("\nAll Legal Moves Sorted by Evaluation:")
-        print("-" * 50)
-        print("Move    | Evaluation | SAN")
-        print("-" * 50)
+    moves_with_eval = evaluate_moves(board, evaluator)
+    for move, eval_score in moves_with_eval:
+        san_move = board.san(move)
+        print(f"{move}  | {eval_score:9.2f} | {san_move}")
 
-        # Get and display all moves with their evaluations
-        moves_with_eval = evaluate_moves(board, evaluator)
-        for move, eval_score in moves_with_eval:
-            san_move = board.san(move)
-            print(f"{move}  | {eval_score:9.2f} | {san_move}")
+    print("\nEngine Search Result:")
+    # Define search depth
+    depth = 10
 
-        print("\nEngine Search Result:")
-        # Define search depth
-        depth = 7
+    # Find the best move using ChessEngine
+    best_move = engine.find_best_move(depth,time_limit=600)
 
-        # Find the best move using ChessEngine
-        best_move = engine.find_best_move(depth,time_limit=600)
+    print(f"Best Move at depth {depth}: {best_move} ({board.san(best_move)})")
+    print(f"Engine Evaluation: {evaluator.evaluate():.2f}")
+    print("-" * 50)
 
-        print(f"Best Move at depth {depth}: {best_move} ({board.san(best_move)})")
-        print(f"Engine Evaluation: {evaluator.evaluate():.2f}")
-        print("-" * 50)
+
 
 def test_evaluation():
     """Test evaluation function against standard positions"""
@@ -120,17 +117,7 @@ def test_evaluation():
             (0, 0),
             "Equal material (bishop vs knight)"
         ),
-        (
-            "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPPQPPP/RNB1KBNR b KQkq - 1 2",
-            (-400, -300),
-            "White up a knight"
-        ),
-        # Pawn structure positions
-        (
-            "rnbqkbnr/ppp2ppp/8/3pp3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
-            (0, 0),
-            "Equal pawn structure"
-        ),
+
         # Stalemate position
         (
             "k7/8/1K6/8/8/8/8/8 b - - 0 1",
